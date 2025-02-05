@@ -67,7 +67,7 @@ export class Lexer {
     return token
   }
 
-  private skipWhitespace() {
+  public skipWhitespace() {
     const skipCharacters = [' ', '\t', '\n', '\r']
     while (skipCharacters.includes(this.currentCharacter)) {
       this.readChar()
