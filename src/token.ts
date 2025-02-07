@@ -23,6 +23,8 @@ export class Token {
 
   static LT: TokenType = '<'
   static GT: TokenType = '>'
+  static EQ: TokenType = '=='
+  static NOT_EQ: TokenType = '!='
 
   // Delimiters
   static COMMA: TokenType = ','

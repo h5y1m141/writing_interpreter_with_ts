@@ -17,6 +17,8 @@ describe('Lexer', () => {
       } else {
         return false;
       }
+      10 == 10;
+      10 != 9;
       `
       const tests: { expectedType: TokenType; expectedLiteral: string }[] = [
         { expectedType: Token.LET, expectedLiteral: 'let' },
@@ -84,6 +86,14 @@ describe('Lexer', () => {
         { expectedType: Token.FALSE, expectedLiteral: 'false' },
         { expectedType: Token.SEMICOLON, expectedLiteral: ';' },
         { expectedType: Token.RBRACE, expectedLiteral: '}' },
+        { expectedType: Token.INT, expectedLiteral: '10' },
+        { expectedType: Token.EQ, expectedLiteral: '==' },
+        { expectedType: Token.INT, expectedLiteral: '10' },
+        { expectedType: Token.SEMICOLON, expectedLiteral: ';' },
+        { expectedType: Token.INT, expectedLiteral: '10' },
+        { expectedType: Token.NOT_EQ, expectedLiteral: '!=' },
+        { expectedType: Token.INT, expectedLiteral: '9' },
+        { expectedType: Token.SEMICOLON, expectedLiteral: ';' },
         { expectedType: Token.EOF, expectedLiteral: '' },
       ]
       const lexer = new Lexer(input)
