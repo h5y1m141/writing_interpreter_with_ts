@@ -12,6 +12,11 @@ describe('Lexer', () => {
       let result = add(five, ten);
       !-/*5;
       5 < 10 > 5;
+      if (5 < 10) {
+        return true;
+      } else {
+        return false;
+      }
       `
       const tests: { expectedType: TokenType; expectedLiteral: string }[] = [
         { expectedType: Token.LET, expectedLiteral: 'let' },
@@ -62,6 +67,23 @@ describe('Lexer', () => {
         { expectedType: Token.GT, expectedLiteral: '>' },
         { expectedType: Token.INT, expectedLiteral: '5' },
         { expectedType: Token.SEMICOLON, expectedLiteral: ';' },
+        { expectedType: Token.IF, expectedLiteral: 'if' },
+        { expectedType: Token.LPAREN, expectedLiteral: '(' },
+        { expectedType: Token.INT, expectedLiteral: '5' },
+        { expectedType: Token.LT, expectedLiteral: '<' },
+        { expectedType: Token.INT, expectedLiteral: '10' },
+        { expectedType: Token.RPAREN, expectedLiteral: ')' },
+        { expectedType: Token.LBRACE, expectedLiteral: '{' },
+        { expectedType: Token.RETURN, expectedLiteral: 'return' },
+        { expectedType: Token.TRUE, expectedLiteral: 'true' },
+        { expectedType: Token.SEMICOLON, expectedLiteral: ';' },
+        { expectedType: Token.RBRACE, expectedLiteral: '}' },
+        { expectedType: Token.ELSE, expectedLiteral: 'else' },
+        { expectedType: Token.LBRACE, expectedLiteral: '{' },
+        { expectedType: Token.RETURN, expectedLiteral: 'return' },
+        { expectedType: Token.FALSE, expectedLiteral: 'false' },
+        { expectedType: Token.SEMICOLON, expectedLiteral: ';' },
+        { expectedType: Token.RBRACE, expectedLiteral: '}' },
         { expectedType: Token.EOF, expectedLiteral: '' },
       ]
       const lexer = new Lexer(input)
