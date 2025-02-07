@@ -19,6 +19,8 @@ export class Lexer {
   public nextToken(): Token {
     let token: Token
 
+    this.skipWhitespace()
+
     switch (this.currentCharacter) {
       case '=':
         token = this.newToken(Token.ASSIGN, this.currentCharacter)
@@ -48,12 +50,28 @@ export class Lexer {
         token = this.newToken(Token.EOF, '')
         break
       default:
-        // 現時点では未対応の文字は ILLEGAL とする
-        token = this.newToken(Token.ILLEGAL, this.currentCharacter)
+        if (this.isLetter(this.currentCharacter)) {
+          const literal = this.readIdentifier()
+          // 識別子がキーワードであるかどうかは lookupIdent() で判定
+          return new Token(Token.lookupIdent(literal), literal)
+        } else if (this.isDigit(this.currentCharacter)) {
+          const type = Token.INT
+          const literal = this.readNumber()
+          return new Token(type, literal)
+        } else {
+          token = this.newToken(Token.ILLEGAL, this.currentCharacter)
+        }
         break
     }
     this.readChar()
     return token
+  }
+
+  public skipWhitespace() {
+    const skipCharacters = [' ', '\t', '\n', '\r']
+    while (skipCharacters.includes(this.currentCharacter)) {
+      this.readChar()
+    }
   }
 
   private readChar(): void {
@@ -67,5 +85,33 @@ export class Lexer {
 
   private newToken(type: TokenType, literal: string): Token {
     return new Token(type, literal)
+  }
+
+  public readIdentifier() {
+    const position = this.position
+    while (this.isLetter(this.currentCharacter)) {
+      this.readChar()
+    }
+    return this.input.substring(position, this.position)
+  }
+
+  public isLetter(currentCharacter: string) {
+    return (
+      (currentCharacter >= 'a' && currentCharacter <= 'z') ||
+      (currentCharacter >= 'A' && currentCharacter <= 'Z') ||
+      currentCharacter === '_'
+    )
+  }
+
+  private isDigit(currentCharacter: string) {
+    return '0' <= currentCharacter && this.currentCharacter <= '9'
+  }
+
+  private readNumber() {
+    const position = this.position
+    while (this.isDigit(this.currentCharacter)) {
+      this.readChar()
+    }
+    return this.input.substring(position, this.position)
   }
 }
