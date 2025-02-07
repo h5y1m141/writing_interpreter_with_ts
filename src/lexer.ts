@@ -23,8 +23,18 @@ export class Lexer {
 
     switch (this.currentCharacter) {
       case '=':
-        token = this.newToken(Token.ASSIGN, this.currentCharacter)
-        break
+        if (this.peekChar() == '=') {
+          const type = Token.EQ
+          const currentCharacter = this.currentCharacter
+          this.readChar()
+          const literal = currentCharacter + this.currentCharacter
+          token = this.newToken(type, literal)
+          break
+        } else {
+          token = this.newToken(Token.ASSIGN, this.currentCharacter)
+          break
+        }
+
       case ';':
         token = this.newToken(Token.SEMICOLON, this.currentCharacter)
         break
@@ -53,8 +63,17 @@ export class Lexer {
         token = this.newToken(Token.MINUS, this.currentCharacter)
         break
       case '!':
-        token = this.newToken(Token.BANG, this.currentCharacter)
-        break
+        if (this.peekChar() == '=') {
+          const type = Token.NOT_EQ
+          const currentCharacter = this.currentCharacter
+          this.readChar()
+          const literal = currentCharacter + this.currentCharacter
+          token = this.newToken(type, literal)
+          break
+        } else {
+          token = this.newToken(Token.BANG, this.currentCharacter)
+          break
+        }
       case '/':
         token = this.newToken(Token.SLASH, this.currentCharacter)
         break
@@ -134,5 +153,15 @@ export class Lexer {
       this.readChar()
     }
     return this.input.substring(position, this.position)
+  }
+
+  // NOTE:本来はprivateメソッド
+  // 挙動がわかりづらいため自分の理解確認のためにユニットテストを書くためにpublicにしています
+  public peekChar() {
+    if (this.readPosition >= this.input.length) {
+      return 0
+    } else {
+      return this.input[this.readPosition]
+    }
   }
 }

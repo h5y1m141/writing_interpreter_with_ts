@@ -151,4 +151,20 @@ describe('Lexer', () => {
       expect(identifier).toBe('')
     })
   })
+  describe('peekChar', () => {
+    describe('入力文字列が==の場合', () => {
+      const lexer = new Lexer('==')
+
+      it('引数がアルファベットの場合はtrueが得られる', () => {
+        expect(lexer.peekChar()).toBe('=')
+      })
+    })
+    describe('入力文字列が!=の場合', () => {
+      const lexer = new Lexer('!=')
+
+      it('引数がアルファベットの場合はtrueが得られる', () => {
+        expect(lexer.peekChar()).toBe('=')
+      })
+    })
+  })
 })
