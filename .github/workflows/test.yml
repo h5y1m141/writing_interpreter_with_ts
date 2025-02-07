@@ -1,0 +1,23 @@
+name: Run Bun Tests
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Bun をセットアップ
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: 依存関係をインストール
+        run: bun install
+
+      - name: テストを実行
+        run: bun test
