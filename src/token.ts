@@ -16,6 +16,15 @@ export class Token {
   // Operators
   static ASSIGN: TokenType = '='
   static PLUS: TokenType = '+'
+  static MINUS: TokenType = '-'
+  static BANG: TokenType = '!'
+  static ASTERISK: TokenType = '*'
+  static SLASH: TokenType = '/'
+
+  static LT: TokenType = '<'
+  static GT: TokenType = '>'
+  static EQ: TokenType = '=='
+  static NOT_EQ: TokenType = '!='
 
   // Delimiters
   static COMMA: TokenType = ','

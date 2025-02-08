@@ -10,6 +10,15 @@ describe('Lexer', () => {
       let add = fn(x, y) { x + y;
       };
       let result = add(five, ten);
+      !-/*5;
+      5 < 10 > 5;
+      if (5 < 10) {
+        return true;
+      } else {
+        return false;
+      }
+      10 == 10;
+      10 != 9;
       `
       const tests: { expectedType: TokenType; expectedLiteral: string }[] = [
         { expectedType: Token.LET, expectedLiteral: 'let' },
@@ -47,6 +56,43 @@ describe('Lexer', () => {
         { expectedType: Token.COMMA, expectedLiteral: ',' },
         { expectedType: Token.IDENT, expectedLiteral: 'ten' },
         { expectedType: Token.RPAREN, expectedLiteral: ')' },
+        { expectedType: Token.SEMICOLON, expectedLiteral: ';' },
+        { expectedType: Token.BANG, expectedLiteral: '!' },
+        { expectedType: Token.MINUS, expectedLiteral: '-' },
+        { expectedType: Token.SLASH, expectedLiteral: '/' },
+        { expectedType: Token.ASTERISK, expectedLiteral: '*' },
+        { expectedType: Token.INT, expectedLiteral: '5' },
+        { expectedType: Token.SEMICOLON, expectedLiteral: ';' },
+        { expectedType: Token.INT, expectedLiteral: '5' },
+        { expectedType: Token.LT, expectedLiteral: '<' },
+        { expectedType: Token.INT, expectedLiteral: '10' },
+        { expectedType: Token.GT, expectedLiteral: '>' },
+        { expectedType: Token.INT, expectedLiteral: '5' },
+        { expectedType: Token.SEMICOLON, expectedLiteral: ';' },
+        { expectedType: Token.IF, expectedLiteral: 'if' },
+        { expectedType: Token.LPAREN, expectedLiteral: '(' },
+        { expectedType: Token.INT, expectedLiteral: '5' },
+        { expectedType: Token.LT, expectedLiteral: '<' },
+        { expectedType: Token.INT, expectedLiteral: '10' },
+        { expectedType: Token.RPAREN, expectedLiteral: ')' },
+        { expectedType: Token.LBRACE, expectedLiteral: '{' },
+        { expectedType: Token.RETURN, expectedLiteral: 'return' },
+        { expectedType: Token.TRUE, expectedLiteral: 'true' },
+        { expectedType: Token.SEMICOLON, expectedLiteral: ';' },
+        { expectedType: Token.RBRACE, expectedLiteral: '}' },
+        { expectedType: Token.ELSE, expectedLiteral: 'else' },
+        { expectedType: Token.LBRACE, expectedLiteral: '{' },
+        { expectedType: Token.RETURN, expectedLiteral: 'return' },
+        { expectedType: Token.FALSE, expectedLiteral: 'false' },
+        { expectedType: Token.SEMICOLON, expectedLiteral: ';' },
+        { expectedType: Token.RBRACE, expectedLiteral: '}' },
+        { expectedType: Token.INT, expectedLiteral: '10' },
+        { expectedType: Token.EQ, expectedLiteral: '==' },
+        { expectedType: Token.INT, expectedLiteral: '10' },
+        { expectedType: Token.SEMICOLON, expectedLiteral: ';' },
+        { expectedType: Token.INT, expectedLiteral: '10' },
+        { expectedType: Token.NOT_EQ, expectedLiteral: '!=' },
+        { expectedType: Token.INT, expectedLiteral: '9' },
         { expectedType: Token.SEMICOLON, expectedLiteral: ';' },
         { expectedType: Token.EOF, expectedLiteral: '' },
       ]
@@ -103,6 +149,38 @@ describe('Lexer', () => {
       lexer.skipWhitespace()
       const identifier = lexer.readIdentifier()
       expect(identifier).toBe('')
+    })
+  })
+  describe('peekChar', () => {
+    describe('入力文字列が==の場合', () => {
+      const lexer = new Lexer('==')
+
+      it('「=」の文字列が得られる', () => {
+        expect(lexer.peekChar()).toBe('=')
+      })
+    })
+    describe('入力文字列が!=の場合', () => {
+      const lexer = new Lexer('!=')
+
+      it('「=」の文字列が得られる', () => {
+        expect(lexer.peekChar()).toBe('=')
+      })
+    })
+  })
+  describe('extractChainedOperator', () => {
+    describe('入力文字列が==の場合', () => {
+      const lexer = new Lexer('==')
+
+      it('「==」の文字列が得られる', () => {
+        expect(lexer.extractChainedOperator()).toBe('==')
+      })
+    })
+    describe('入力文字列が!=の場合', () => {
+      const lexer = new Lexer('!=')
+
+      it('「!=」の文字列が得られる', () => {
+        expect(lexer.extractChainedOperator()).toBe('!=')
+      })
     })
   })
 })

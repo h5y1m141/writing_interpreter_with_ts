@@ -23,8 +23,16 @@ export class Lexer {
 
     switch (this.currentCharacter) {
       case '=':
-        token = this.newToken(Token.ASSIGN, this.currentCharacter)
-        break
+        if (this.isPeekCharAssign()) {
+          const type = Token.EQ
+          const literal = this.extractChainedOperator()
+          token = this.newToken(type, literal)
+          break
+        } else {
+          token = this.newToken(Token.ASSIGN, this.currentCharacter)
+          break
+        }
+
       case ';':
         token = this.newToken(Token.SEMICOLON, this.currentCharacter)
         break
@@ -45,6 +53,34 @@ export class Lexer {
         break
       case '}':
         token = this.newToken(Token.RBRACE, this.currentCharacter)
+        break
+      case '+':
+        token = this.newToken(Token.PLUS, this.currentCharacter)
+        break
+      case '-':
+        token = this.newToken(Token.MINUS, this.currentCharacter)
+        break
+      case '!':
+        if (this.isPeekCharAssign()) {
+          const type = Token.NOT_EQ
+          const literal = this.extractChainedOperator()
+          token = this.newToken(type, literal)
+          break
+        } else {
+          token = this.newToken(Token.BANG, this.currentCharacter)
+          break
+        }
+      case '/':
+        token = this.newToken(Token.SLASH, this.currentCharacter)
+        break
+      case '*':
+        token = this.newToken(Token.ASTERISK, this.currentCharacter)
+        break
+      case '<':
+        token = this.newToken(Token.LT, this.currentCharacter)
+        break
+      case '>':
+        token = this.newToken(Token.GT, this.currentCharacter)
         break
       case '\0':
         token = this.newToken(Token.EOF, '')
@@ -113,5 +149,25 @@ export class Lexer {
       this.readChar()
     }
     return this.input.substring(position, this.position)
+  }
+
+  public extractChainedOperator() {
+    const keepCurrentCharacter = this.currentCharacter
+    this.readChar()
+    return keepCurrentCharacter + this.currentCharacter
+  }
+
+  // NOTE:本来はprivateメソッド
+  // 挙動がわかりづらいため自分の理解確認のためにユニットテストを書くためにpublicにしています
+  public peekChar() {
+    if (this.readPosition >= this.input.length) {
+      return 0
+    } else {
+      return this.input[this.readPosition]
+    }
+  }
+
+  private isPeekCharAssign() {
+    return this.peekChar() == '='
   }
 }
