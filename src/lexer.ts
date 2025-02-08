@@ -23,11 +23,9 @@ export class Lexer {
 
     switch (this.currentCharacter) {
       case '=':
-        if (this.peekChar() == '=') {
+        if (this.isPeekCharAssign()) {
           const type = Token.EQ
-          const currentCharacter = this.currentCharacter
-          this.readChar()
-          const literal = currentCharacter + this.currentCharacter
+          const literal = this.extractChainedOperator()
           token = this.newToken(type, literal)
           break
         } else {
@@ -63,11 +61,9 @@ export class Lexer {
         token = this.newToken(Token.MINUS, this.currentCharacter)
         break
       case '!':
-        if (this.peekChar() == '=') {
+        if (this.isPeekCharAssign()) {
           const type = Token.NOT_EQ
-          const currentCharacter = this.currentCharacter
-          this.readChar()
-          const literal = currentCharacter + this.currentCharacter
+          const literal = this.extractChainedOperator()
           token = this.newToken(type, literal)
           break
         } else {
@@ -155,6 +151,12 @@ export class Lexer {
     return this.input.substring(position, this.position)
   }
 
+  public extractChainedOperator() {
+    const keepCurrentCharacter = this.currentCharacter
+    this.readChar()
+    return keepCurrentCharacter + this.currentCharacter
+  }
+
   // NOTE:本来はprivateメソッド
   // 挙動がわかりづらいため自分の理解確認のためにユニットテストを書くためにpublicにしています
   public peekChar() {
@@ -163,5 +165,9 @@ export class Lexer {
     } else {
       return this.input[this.readPosition]
     }
+  }
+
+  private isPeekCharAssign() {
+    return this.peekChar() == '='
   }
 }

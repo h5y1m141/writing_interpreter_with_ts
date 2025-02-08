@@ -155,15 +155,31 @@ describe('Lexer', () => {
     describe('入力文字列が==の場合', () => {
       const lexer = new Lexer('==')
 
-      it('引数がアルファベットの場合はtrueが得られる', () => {
+      it('「=」の文字列が得られる', () => {
         expect(lexer.peekChar()).toBe('=')
       })
     })
     describe('入力文字列が!=の場合', () => {
       const lexer = new Lexer('!=')
 
-      it('引数がアルファベットの場合はtrueが得られる', () => {
+      it('「=」の文字列が得られる', () => {
         expect(lexer.peekChar()).toBe('=')
+      })
+    })
+  })
+  describe('extractChainedOperator', () => {
+    describe('入力文字列が==の場合', () => {
+      const lexer = new Lexer('==')
+
+      it('「==」の文字列が得られる', () => {
+        expect(lexer.extractChainedOperator()).toBe('==')
+      })
+    })
+    describe('入力文字列が!=の場合', () => {
+      const lexer = new Lexer('!=')
+
+      it('「!=」の文字列が得られる', () => {
+        expect(lexer.extractChainedOperator()).toBe('!=')
       })
     })
   })
