@@ -27,6 +27,8 @@
     "baseUrl": "./",
     "paths": {
       "src/*": ["src/*"]
-    }
+    },
+    // TypeScript が Bun の型情報を正しく認識できるようにするための対応
+    "types": ["bun"]
   }
 }
