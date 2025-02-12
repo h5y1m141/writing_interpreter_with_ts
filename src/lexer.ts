@@ -1,5 +1,4 @@
-import type { TokenType } from 'src/token'
-import { Token } from 'src/token'
+import { Token, TokenType } from 'src/token'
 
 export class Lexer {
   private input: string
@@ -24,66 +23,66 @@ export class Lexer {
     switch (this.currentCharacter) {
       case '=':
         if (this.isPeekCharAssign()) {
-          const type = Token.EQ
+          const type = TokenType.EQ
           const literal = this.extractChainedOperator()
           token = this.newToken(type, literal)
           break
         } else {
-          token = this.newToken(Token.ASSIGN, this.currentCharacter)
+          token = this.newToken(TokenType.ASSIGN, this.currentCharacter)
           break
         }
 
       case ';':
-        token = this.newToken(Token.SEMICOLON, this.currentCharacter)
+        token = this.newToken(TokenType.SEMICOLON, this.currentCharacter)
         break
       case '(':
-        token = this.newToken(Token.LPAREN, this.currentCharacter)
+        token = this.newToken(TokenType.LPAREN, this.currentCharacter)
         break
       case ')':
-        token = this.newToken(Token.RPAREN, this.currentCharacter)
+        token = this.newToken(TokenType.RPAREN, this.currentCharacter)
         break
       case ',':
-        token = this.newToken(Token.COMMA, this.currentCharacter)
+        token = this.newToken(TokenType.COMMA, this.currentCharacter)
         break
       case '+':
-        token = this.newToken(Token.PLUS, this.currentCharacter)
+        token = this.newToken(TokenType.PLUS, this.currentCharacter)
         break
       case '{':
-        token = this.newToken(Token.LBRACE, this.currentCharacter)
+        token = this.newToken(TokenType.LBRACE, this.currentCharacter)
         break
       case '}':
-        token = this.newToken(Token.RBRACE, this.currentCharacter)
+        token = this.newToken(TokenType.RBRACE, this.currentCharacter)
         break
       case '+':
-        token = this.newToken(Token.PLUS, this.currentCharacter)
+        token = this.newToken(TokenType.PLUS, this.currentCharacter)
         break
       case '-':
-        token = this.newToken(Token.MINUS, this.currentCharacter)
+        token = this.newToken(TokenType.MINUS, this.currentCharacter)
         break
       case '!':
         if (this.isPeekCharAssign()) {
-          const type = Token.NOT_EQ
+          const type = TokenType.NOT_EQ
           const literal = this.extractChainedOperator()
           token = this.newToken(type, literal)
           break
         } else {
-          token = this.newToken(Token.BANG, this.currentCharacter)
+          token = this.newToken(TokenType.BANG, this.currentCharacter)
           break
         }
       case '/':
-        token = this.newToken(Token.SLASH, this.currentCharacter)
+        token = this.newToken(TokenType.SLASH, this.currentCharacter)
         break
       case '*':
-        token = this.newToken(Token.ASTERISK, this.currentCharacter)
+        token = this.newToken(TokenType.ASTERISK, this.currentCharacter)
         break
       case '<':
-        token = this.newToken(Token.LT, this.currentCharacter)
+        token = this.newToken(TokenType.LT, this.currentCharacter)
         break
       case '>':
-        token = this.newToken(Token.GT, this.currentCharacter)
+        token = this.newToken(TokenType.GT, this.currentCharacter)
         break
       case '\0':
-        token = this.newToken(Token.EOF, '')
+        token = this.newToken(TokenType.EOF, '')
         break
       default:
         if (this.isLetter(this.currentCharacter)) {
@@ -91,11 +90,11 @@ export class Lexer {
           // 識別子がキーワードであるかどうかは lookupIdent() で判定
           return new Token(Token.lookupIdent(literal), literal)
         } else if (this.isDigit(this.currentCharacter)) {
-          const type = Token.INT
+          const type = TokenType.INT
           const literal = this.readNumber()
           return new Token(type, literal)
         } else {
-          token = this.newToken(Token.ILLEGAL, this.currentCharacter)
+          token = this.newToken(TokenType.ILLEGAL, this.currentCharacter)
         }
         break
     }
