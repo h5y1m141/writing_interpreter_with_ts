@@ -1,4 +1,59 @@
-export type TokenType = string
+// 特殊トークン
+export const SpecialTokens = {
+  ILLEGAL: 'ILLEGAL',
+  EOF: 'EOF',
+} as const
+
+// 識別子 & リテラル
+export const IdentifiersAndLiterals = {
+  IDENT: 'IDENT',
+  INT: 'INT',
+} as const
+
+// 演算子
+export const Operators = {
+  ASSIGN: '=',
+  PLUS: '+',
+  MINUS: '-',
+  BANG: '!',
+  ASTERISK: '*',
+  SLASH: '/',
+  LT: '<',
+  GT: '>',
+  EQ: '==',
+  NOT_EQ: '!=',
+} as const
+
+// デリミタ
+export const Delimiters = {
+  COMMA: ',',
+  SEMICOLON: ';',
+  LPAREN: '(',
+  RPAREN: ')',
+  LBRACE: '{',
+  RBRACE: '}',
+} as const
+
+// キーワード
+export const Keywords = {
+  LET: 'let',
+  FUNCTION: 'fn',
+  TRUE: 'true',
+  FALSE: 'false',
+  IF: 'if',
+  ELSE: 'else',
+  RETURN: 'return',
+} as const
+
+export const TokenType = {
+  ...SpecialTokens,
+  ...IdentifiersAndLiterals,
+  ...Operators,
+  ...Delimiters,
+  ...Keywords,
+} as const
+
+export type TokenType = (typeof TokenType)[keyof typeof TokenType]
 
 export class Token {
   constructor(
@@ -6,55 +61,17 @@ export class Token {
     public literal: string
   ) {}
 
-  static ILLEGAL: TokenType = 'ILLEGAL'
-  static EOF: TokenType = 'EOF'
-
-  // Identifiers + literals
-  static IDENT: TokenType = 'IDENT'
-  static INT: TokenType = 'INT'
-
-  // Operators
-  static ASSIGN: TokenType = '='
-  static PLUS: TokenType = '+'
-  static MINUS: TokenType = '-'
-  static BANG: TokenType = '!'
-  static ASTERISK: TokenType = '*'
-  static SLASH: TokenType = '/'
-
-  static LT: TokenType = '<'
-  static GT: TokenType = '>'
-  static EQ: TokenType = '=='
-  static NOT_EQ: TokenType = '!='
-
-  // Delimiters
-  static COMMA: TokenType = ','
-  static SEMICOLON: TokenType = ';'
-
-  static LPAREN: TokenType = '('
-  static RPAREN: TokenType = ')'
-  static LBRACE: TokenType = '{'
-  static RBRACE: TokenType = '}'
-
-  // Keywords
-  static LET: TokenType = 'let'
-  static FUNCTION: TokenType = 'FUNCTION'
-  static TRUE: TokenType = 'TRUE'
-  static FALSE: TokenType = 'FALSE'
-  static IF: TokenType = 'IF'
-  static ELSE: TokenType = 'ELSE'
-  static RETURN: TokenType = 'RETURN'
-
   static keywords: { [ident: string]: TokenType } = {
-    fn: Token.FUNCTION,
-    let: Token.LET,
-    true: Token.TRUE,
-    false: Token.FALSE,
-    if: Token.IF,
-    else: Token.ELSE,
-    return: Token.RETURN,
+    fn: TokenType.FUNCTION,
+    let: TokenType.LET,
+    true: TokenType.TRUE,
+    false: TokenType.FALSE,
+    if: TokenType.IF,
+    else: TokenType.ELSE,
+    return: TokenType.RETURN,
   }
 
   static lookupIdent(ident: string): TokenType {
-    return Token.keywords[ident] || Token.IDENT
+    return Token.keywords[ident] || TokenType.IDENT
   }
 }
