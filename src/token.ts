@@ -1,41 +1,59 @@
-export enum TokenType {
-  // 特殊トークン
-  ILLEGAL = 'ILLEGAL',
-  EOF = 'EOF',
+// 特殊トークン
+export const SpecialTokens = {
+  ILLEGAL: 'ILLEGAL',
+  EOF: 'EOF',
+} as const
 
-  // 識別子 & リテラル
-  IDENT = 'IDENT',
-  INT = 'INT',
+// 識別子 & リテラル
+export const IdentifiersAndLiterals = {
+  IDENT: 'IDENT',
+  INT: 'INT',
+} as const
 
-  // 演算子
-  ASSIGN = '=',
-  PLUS = '+',
-  MINUS = '-',
-  BANG = '!',
-  ASTERISK = '*',
-  SLASH = '/',
-  LT = '<',
-  GT = '>',
-  EQ = '==',
-  NOT_EQ = '!=',
+// 演算子
+export const Operators = {
+  ASSIGN: '=',
+  PLUS: '+',
+  MINUS: '-',
+  BANG: '!',
+  ASTERISK: '*',
+  SLASH: '/',
+  LT: '<',
+  GT: '>',
+  EQ: '==',
+  NOT_EQ: '!=',
+} as const
 
-  // デリミタ
-  COMMA = ',',
-  SEMICOLON = ';',
-  LPAREN = '(',
-  RPAREN = ')',
-  LBRACE = '{',
-  RBRACE = '}',
+// デリミタ
+export const Delimiters = {
+  COMMA: ',',
+  SEMICOLON: ';',
+  LPAREN: '(',
+  RPAREN: ')',
+  LBRACE: '{',
+  RBRACE: '}',
+} as const
 
-  // キーワード
-  LET = 'let',
-  FUNCTION = 'fn',
-  TRUE = 'true',
-  FALSE = 'false',
-  IF = 'if',
-  ELSE = 'else',
-  RETURN = 'return',
-}
+// キーワード
+export const Keywords = {
+  LET: 'let',
+  FUNCTION: 'fn',
+  TRUE: 'true',
+  FALSE: 'false',
+  IF: 'if',
+  ELSE: 'else',
+  RETURN: 'return',
+} as const
+
+export const TokenType = {
+  ...SpecialTokens,
+  ...IdentifiersAndLiterals,
+  ...Operators,
+  ...Delimiters,
+  ...Keywords,
+} as const
+
+export type TokenType = (typeof TokenType)[keyof typeof TokenType]
 
 export class Token {
   constructor(
