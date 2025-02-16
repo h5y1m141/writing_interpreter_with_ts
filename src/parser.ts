@@ -58,9 +58,14 @@ export class Parser {
 
     if (!this.expectPeek(TokenType.ASSIGN)) return null
 
-    while (!this.curTokenIs(TokenType.SEMICOLON)) {
-      this.nextToken()
-    }
+    this.nextToken()
+
+    statement.value = new Identifier(
+      this.currentToken,
+      this.currentToken.literal
+    )
+
+    if (!this.expectPeek(TokenType.SEMICOLON)) return null
 
     return statement
   }
