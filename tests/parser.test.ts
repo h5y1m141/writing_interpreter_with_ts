@@ -3,6 +3,7 @@ import { Lexer } from '../src/lexer'
 import { Parser } from '../src/parser'
 import { LetStatement, Program } from '../src/ast'
 import type { Statement } from '../src/ast'
+import { TokenType } from 'src/token'
 
 describe('Parser', () => {
   describe('let', () => {
@@ -32,6 +33,51 @@ describe('Parser', () => {
           true
         )
       }
+    })
+    it('should parse let statements into correct AST structure', () => {
+      const expectedResults = [
+        {
+          token: { type: TokenType.LET, literal: 'let' },
+          name: {
+            token: { type: TokenType.IDENT, literal: 'x' },
+            value: 'x',
+          },
+          value: {
+            token: { type: TokenType.INT, literal: '5' },
+            value: '5',
+          },
+        },
+        {
+          token: { type: TokenType.LET, literal: 'let' },
+          name: {
+            token: { type: TokenType.IDENT, literal: 'y' },
+            value: 'y',
+          },
+          value: {
+            token: { type: TokenType.INT, literal: '10' },
+            value: '10',
+          },
+        },
+        {
+          token: { type: TokenType.LET, literal: 'let' },
+          name: {
+            token: { type: TokenType.IDENT, literal: 'foobar' },
+            value: 'foobar',
+          },
+          value: {
+            token: { type: TokenType.INT, literal: '838383' },
+            value: '838383',
+          },
+        },
+      ]
+      expectedResults.forEach((expectedResult, index) => {
+        const statement = program.statements[index] as LetStatement
+        const expected = expectedResult
+        expect(statement.token).toEqual(expected.token)
+        expect(statement.name.token).toEqual(expected.name.token)
+        expect(statement.name.value).toEqual(expected.name.value)
+        expect(statement.value!.token).toEqual(expected.value.token)
+      })
     })
   })
 })

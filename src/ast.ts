@@ -8,8 +8,9 @@ export type Statement = Node & {
   statementNode: () => void
 }
 
-export type Expression = Node & {
+export interface Expression extends Node {
   expressionNode: () => void
+  token: Token
 }
 
 export class Program {
