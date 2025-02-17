@@ -6,6 +6,7 @@ export class Parser {
   private lexer: Lexer
   private currentToken!: Token
   private peekToken!: Token
+  private errors: string[] = [] // エラーメッセージを保持するための
 
   constructor(lexer: Lexer) {
     this.lexer = lexer
@@ -75,6 +76,7 @@ export class Parser {
       this.nextToken()
       return true
     } else {
+      this.peekError(tokenType)
       return false
     }
   }
@@ -82,7 +84,17 @@ export class Parser {
   private curTokenIs(tokenType: TokenType) {
     return this.currentToken.type === tokenType
   }
+
   private peekTokenIs(tokenType: TokenType) {
     return this.peekToken.type === tokenType
+  }
+
+  private peekError(expectedType: TokenType): void {
+    const msg = `expected next token to be ${expectedType}, got ${this.peekToken.type} instead`
+    this.errors.push(msg)
+  }
+
+  public getErrors(): string[] {
+    return this.errors
   }
 }

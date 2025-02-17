@@ -5,6 +5,16 @@ import { LetStatement, Program } from '../src/ast'
 import type { Statement } from '../src/ast'
 import { TokenType } from 'src/token'
 
+const checkParseErrors = (parser: Parser) => {
+  const errors = parser.getErrors()
+  if (errors.length === 0) return
+
+  errors.forEach((error) => {
+    console.error(`Parser error: "${error}"`)
+  })
+
+  throw new Error(`Parse failed with ${errors.length} error(s)`)
+}
 describe('Parser', () => {
   describe('let', () => {
     const input = `
@@ -14,6 +24,7 @@ describe('Parser', () => {
     const lexer = new Lexer(input)
     const parser = new Parser(lexer)
     const program: Program | null = parser.parseProgram()
+    checkParseErrors(parser)
 
     it('program not to be null', () => {
       expect(program).not.toBeNull()
