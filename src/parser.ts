@@ -1,6 +1,37 @@
 import { Lexer } from './lexer'
 import { Token, TokenType } from './token'
-import { Identifier, LetStatement, Program, type Statement } from './ast'
+import {
+  Identifier,
+  BooleanLiteral,
+  IntegerLiteral,
+  LetStatement,
+  Program,
+  ReturnStatement,
+  type Statement,
+} from './ast'
+import type { Expression } from './ast'
+
+export enum Precedence {
+  LOWEST = 1,
+  EQUALS, // ==, !=
+  LESSGREATER, // >, <
+  SUM, // +, -
+  PRODUCT, // *, /
+  PREFIX, // -X, !X
+  CALL, // 関数呼び出し
+}
+
+export const precedences: Partial<Record<TokenType, Precedence>> = {
+  [TokenType.EQ]: Precedence.EQUALS,
+  [TokenType.NOT_EQ]: Precedence.EQUALS,
+  [TokenType.LT]: Precedence.LESSGREATER,
+  [TokenType.GT]: Precedence.LESSGREATER,
+  [TokenType.PLUS]: Precedence.SUM,
+  [TokenType.MINUS]: Precedence.SUM,
+  [TokenType.SLASH]: Precedence.PRODUCT,
+  [TokenType.ASTERISK]: Precedence.PRODUCT,
+  [TokenType.LPAREN]: Precedence.CALL,
+}
 
 export class Parser {
   private lexer: Lexer
@@ -14,6 +45,31 @@ export class Parser {
     // 2つトークンを読み込む。curTokenとpeekTokenの両方をセット
     this.nextToken()
     this.nextToken()
+
+    this.registerPrefix(TokenType.IDENT, this.parseIdentifier.bind(this))
+    this.registerPrefix(TokenType.INT, this.parseIntegerLiteral.bind(this))
+    this.registerPrefix(TokenType.TRUE, this.parseBoolean.bind(this))
+    this.registerPrefix(TokenType.FALSE, this.parseBoolean.bind(this))
+  }
+
+  private registerPrefix(tokenType: TokenType, fn: () => Expression) {
+    this.prefixParseFns.set(tokenType, fn)
+  }
+
+  private parseIdentifier(): Expression {
+    return new Identifier(this.currentToken, this.currentToken.literal)
+  }
+  private parseIntegerLiteral(): Expression {
+    return new IntegerLiteral(
+      this.currentToken,
+      parseInt(this.currentToken.literal, 10)
+    )
+  }
+  private parseBoolean(): Expression {
+    return new BooleanLiteral(
+      this.currentToken,
+      this.currentToken.type === TokenType.TRUE
+    )
   }
 
   private nextToken(): void {
@@ -39,6 +95,8 @@ export class Parser {
     switch (this.currentToken.type) {
       case TokenType.LET:
         return this.parseLetStatement()
+      case TokenType.RETURN:
+        return this.parseReturnStatement()
       default:
         return null
     }
@@ -71,6 +129,21 @@ export class Parser {
     return statement
   }
 
+  private parseReturnStatement(): ReturnStatement | null {
+    const statement = new ReturnStatement(
+      this.currentToken,
+      new Identifier(this.peekToken, '')
+    )
+
+    this.nextToken()
+
+    statement.returnValue = this.parseExpression(Precedence.LOWEST)
+
+    if (!this.expectPeek(TokenType.SEMICOLON)) return null
+
+    return statement
+  }
+
   private expectPeek(tokenType: TokenType) {
     if (this.peekTokenIs(tokenType)) {
       this.nextToken()
@@ -96,5 +169,38 @@ export class Parser {
 
   public getErrors(): string[] {
     return this.errors
+  }
+
+  private parseExpression(precedence: Precedence): Expression {
+    const prefix = this.prefixParseFns.get(this.currentToken.type)
+    if (!prefix) {
+      this.errors.push(
+        `no prefix parse function for ${this.currentToken.type} found`
+      )
+      return new Identifier(this.currentToken, '') // 仮のダミー
+    }
+    let leftExpression = prefix()
+
+    while (
+      !this.peekTokenIs(TokenType.SEMICOLON) &&
+      precedence < this.peekPrecedence()
+    ) {
+      const infix = this.infixParseFns.get(this.peekToken.type)
+      if (!infix) return leftExpression
+
+      this.nextToken()
+      leftExpression = infix(leftExpression)
+    }
+    return leftExpression
+  }
+
+  // 前置演算子を解析するための関数を格納したマップ です。
+  private prefixParseFns: Map<TokenType, () => Expression> = new Map()
+  // 中置演算子（infix operators）を解析するための関数を格納するマップ
+  private infixParseFns: Map<TokenType, (left: Expression) => Expression> =
+    new Map()
+  // 次のトークン (peekToken) の優先順位を取得する関数
+  private peekPrecedence(): Precedence {
+    return precedences[this.peekToken.type] ?? Precedence.LOWEST
   }
 }
