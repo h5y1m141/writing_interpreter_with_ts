@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { Lexer } from '../src/lexer'
 import { Parser } from '../src/parser'
 import { LetStatement, Program } from '../src/ast'
-import type { Statement } from '../src/ast'
+import type { ReturnStatement, Statement } from '../src/ast'
 import { TokenType } from 'src/token'
 
 const checkParseErrors = (parser: Parser) => {
@@ -88,6 +88,48 @@ describe('Parser', () => {
         expect(statement.name.token).toEqual(expected.name.token)
         expect(statement.name.value).toEqual(expected.name.value)
         expect(statement.value!.token).toEqual(expected.value.token)
+      })
+    })
+  })
+
+  describe('return', () => {
+    const input = `return 5;
+return true;
+return foobar;`
+    const lexer = new Lexer(input)
+    const parser = new Parser(lexer)
+    const program: Program | null = parser.parseProgram()
+    checkParseErrors(parser)
+    it('should parse return statements into correct AST structure', () => {
+      const expectedResults = [
+        {
+          token: { type: TokenType.RETURN, literal: 'return' },
+          returnValue: {
+            token: { type: TokenType.INT, literal: '5' },
+            value: 5,
+          },
+        },
+        {
+          token: { type: TokenType.RETURN, literal: 'return' },
+          returnValue: {
+            token: { type: TokenType.TRUE, literal: 'true' },
+            value: true,
+          },
+        },
+        {
+          token: { type: TokenType.RETURN, literal: 'return' },
+          returnValue: {
+            token: { type: TokenType.IDENT, literal: 'foobar' },
+            value: 'foobar',
+          },
+        },
+      ]
+
+      expectedResults.forEach((expectedResult, index) => {
+        const statement = program.statements[index] as ReturnStatement
+        const expected = expectedResult
+        expect(statement.token).toEqual(expected.token)
+        expect(statement.returnValue).toEqual(expected.returnValue)
       })
     })
   })

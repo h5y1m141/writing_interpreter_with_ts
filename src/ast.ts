@@ -45,6 +45,46 @@ export class Identifier implements Expression {
   }
 }
 
+export class IntegerLiteral implements Expression {
+  public token: Token
+  public value: number
+
+  constructor(token: Token, value: number) {
+    this.token = token
+    this.value = value
+  }
+
+  tokenLiteral(): string {
+    return this.token.literal
+  }
+  toString(): string {
+    return this.value.toString()
+  }
+  expressionNode() {
+    console.log('expressionNode')
+  }
+}
+
+export class BooleanLiteral implements Expression {
+  public token: Token
+  public value: boolean
+
+  constructor(token: Token, value: boolean) {
+    this.token = token
+    this.value = value
+  }
+
+  tokenLiteral(): string {
+    return this.token.literal
+  }
+  toString(): string {
+    return this.value.toString()
+  }
+  expressionNode() {
+    console.log('expressionNode')
+  }
+}
+
 export class LetStatement implements Statement {
   public token: Token
   public name: Identifier
@@ -72,5 +112,29 @@ export class LetStatement implements Statement {
   }
   statementNode() {
     console.log('statementNode')
+  }
+}
+
+export class ReturnStatement implements Statement {
+  public token: Token
+  public returnValue: Expression
+
+  constructor(token: Token, returnValue: Expression) {
+    this.token = token
+    this.returnValue = returnValue
+  }
+
+  tokenLiteral(): string {
+    return this.token.literal
+  }
+
+  expressionNode() {
+    console.log('expressionNode')
+  }
+  statementNode() {
+    console.log('statementNode')
+  }
+  toString(): string {
+    return `${this.tokenLiteral()} ${this.returnValue.toString()};`
   }
 }
