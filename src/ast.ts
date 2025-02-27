@@ -138,3 +138,20 @@ export class ReturnStatement implements Statement {
     return `${this.tokenLiteral()} ${this.returnValue.toString()};`
   }
 }
+
+export class ExpressionStatement implements Statement {
+  public token: Token
+  public expression: Expression | null
+
+  constructor(token: Token, expression: Expression | null = null) {
+    this.token = token
+    this.expression = expression
+  }
+
+  tokenLiteral(): string {
+    return this.token.literal
+  }
+  statementNode() {
+    console.log('statementNode')
+  }
+}

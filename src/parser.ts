@@ -7,12 +7,14 @@ import {
   LetStatement,
   Program,
   ReturnStatement,
+  ExpressionStatement,
   type Statement,
 } from './ast'
 import type { Expression } from './ast'
+import type { E } from 'vitest/dist/chunks/environment.d8YfPkTm.js'
 
 export enum Precedence {
-  LOWEST = 1,
+  LOWEST = 0,
   EQUALS, // ==, !=
   LESSGREATER, // >, <
   SUM, // +, -
@@ -38,7 +40,17 @@ export class Parser {
   private currentToken!: Token
   private peekToken!: Token
   private errors: string[] = [] // エラーメッセージを保持するための
-
+  // 前置構文解析関数（prefixParseFunction）
+  private prefixParseFunctions: Map<TokenType, () => Expression> = new Map()
+  // 中置構文解析関数（infixParseFunction）
+  private infixParseFunctions: Map<
+    TokenType,
+    (left: Expression) => Expression
+  > = new Map()
+  // 次のトークン (peekToken) の優先順位を取得する関数
+  private peekPrecedence(): Precedence {
+    return precedences[this.peekToken.type] ?? Precedence.LOWEST
+  }
   constructor(lexer: Lexer) {
     this.lexer = lexer
 
@@ -53,7 +65,14 @@ export class Parser {
   }
 
   private registerPrefix(tokenType: TokenType, fn: () => Expression) {
-    this.prefixParseFns.set(tokenType, fn)
+    this.prefixParseFunctions.set(tokenType, fn)
+  }
+
+  private registerInfix(
+    tokenType: TokenType,
+    fn: (left: Expression) => Expression
+  ) {
+    this.infixParseFunctions.set(tokenType, fn)
   }
 
   private parseIdentifier(): Expression {
@@ -98,7 +117,7 @@ export class Parser {
       case TokenType.RETURN:
         return this.parseReturnStatement()
       default:
-        return null
+        return this.parseExpressionStatement()
     }
   }
 
@@ -144,6 +163,16 @@ export class Parser {
     return statement
   }
 
+  private parseExpressionStatement(): ExpressionStatement {
+    const statement = new ExpressionStatement(this.currentToken)
+    statement.expression = this.parseExpression(Precedence.LOWEST)
+
+    if (this.peekTokenIs(TokenType.SEMICOLON)) {
+      this.nextToken()
+    }
+    return statement
+  }
+
   private expectPeek(tokenType: TokenType) {
     if (this.peekTokenIs(tokenType)) {
       this.nextToken()
@@ -172,7 +201,7 @@ export class Parser {
   }
 
   private parseExpression(precedence: Precedence): Expression {
-    const prefix = this.prefixParseFns.get(this.currentToken.type)
+    const prefix = this.prefixParseFunctions.get(this.currentToken.type)
     if (!prefix) {
       this.errors.push(
         `no prefix parse function for ${this.currentToken.type} found`
@@ -185,22 +214,12 @@ export class Parser {
       !this.peekTokenIs(TokenType.SEMICOLON) &&
       precedence < this.peekPrecedence()
     ) {
-      const infix = this.infixParseFns.get(this.peekToken.type)
+      const infix = this.infixParseFunctions.get(this.peekToken.type)
       if (!infix) return leftExpression
 
       this.nextToken()
       leftExpression = infix(leftExpression)
     }
     return leftExpression
-  }
-
-  // 前置演算子を解析するための関数を格納したマップ です。
-  private prefixParseFns: Map<TokenType, () => Expression> = new Map()
-  // 中置演算子（infix operators）を解析するための関数を格納するマップ
-  private infixParseFns: Map<TokenType, (left: Expression) => Expression> =
-    new Map()
-  // 次のトークン (peekToken) の優先順位を取得する関数
-  private peekPrecedence(): Precedence {
-    return precedences[this.peekToken.type] ?? Precedence.LOWEST
   }
 }

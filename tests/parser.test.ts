@@ -2,7 +2,12 @@ import { describe, it, expect } from 'vitest'
 import { Lexer } from '../src/lexer'
 import { Parser } from '../src/parser'
 import { LetStatement, Program } from '../src/ast'
-import type { ReturnStatement, Statement } from '../src/ast'
+import type {
+  ExpressionStatement,
+  Identifier,
+  ReturnStatement,
+  Statement,
+} from '../src/ast'
 import { TokenType } from 'src/token'
 
 const checkParseErrors = (parser: Parser) => {
@@ -130,6 +135,33 @@ return foobar;`
         const expected = expectedResult
         expect(statement.token).toEqual(expected.token)
         expect(statement.returnValue).toEqual(expected.returnValue)
+      })
+    })
+  })
+  describe('expression', () => {
+    const input = 'foobar;'
+    const lexer = new Lexer(input)
+    const parser = new Parser(lexer)
+    const program: Program | null = parser.parseProgram()
+    checkParseErrors(parser)
+    it('should parse expression statements into correct AST structure', () => {
+      const expectedResults = [
+        {
+          token: { type: TokenType.IDENT, literal: 'foobar' },
+          expression: {
+            token: { type: TokenType.IDENT, literal: 'foobar' },
+            value: 'foobar',
+          },
+        },
+      ]
+      expectedResults.forEach((expectedResult, index) => {
+        const statement = program.statements[index] as ExpressionStatement
+        const expected = expectedResult
+        expect(statement.token).toEqual(expected.token)
+
+        const identifier = statement.expression as Identifier
+        expect(identifier.token).toEqual(expected.expression.token)
+        expect(identifier.value).toEqual(expected.expression.value)
       })
     })
   })
