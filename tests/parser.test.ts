@@ -165,6 +165,33 @@ return foobar;`
       })
     })
   })
+  describe('IntegerLiteral', () => {
+    const input = '5;'
+    const lexer = new Lexer(input)
+    const parser = new Parser(lexer)
+    const program: Program | null = parser.parseProgram()
+    checkParseErrors(parser)
+    it('should parse Integer Literal expression statements into correct AST structure', () => {
+      const expectedResults = [
+        {
+          token: { type: TokenType.INT, literal: '5' },
+          expression: {
+            token: { type: TokenType.INT, literal: '5' },
+            value: 5,
+          },
+        },
+      ]
+      expectedResults.forEach((expectedResult, index) => {
+        const statement = program.statements[index] as ExpressionStatement
+        const expected = expectedResult
+        expect(statement.token).toEqual(expected.token)
+
+        const identifier = statement.expression as Identifier
+        expect(identifier.token).toEqual(expected.expression.token)
+        expect(identifier.value).toEqual(expected.expression.value)
+      })
+    })
+  })
 })
 
 export function testLetStatement(statement: Statement, name: string): boolean {

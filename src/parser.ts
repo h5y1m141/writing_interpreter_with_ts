@@ -62,6 +62,7 @@ export class Parser {
     this.registerPrefix(TokenType.INT, this.parseIntegerLiteral.bind(this))
     this.registerPrefix(TokenType.TRUE, this.parseBoolean.bind(this))
     this.registerPrefix(TokenType.FALSE, this.parseBoolean.bind(this))
+    this.registerPrefix(TokenType.INT, this.parseIntegerLiteral.bind(this))
   }
 
   private registerPrefix(tokenType: TokenType, fn: () => Expression) {
