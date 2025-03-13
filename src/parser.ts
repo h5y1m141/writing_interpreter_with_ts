@@ -9,6 +9,7 @@ import {
   ReturnStatement,
   ExpressionStatement,
   type Statement,
+  PrefixExpression,
 } from './ast'
 import type { Expression } from './ast'
 import type { E } from 'vitest/dist/chunks/environment.d8YfPkTm.js'
@@ -60,6 +61,8 @@ export class Parser {
 
     this.registerPrefix(TokenType.IDENT, this.parseIdentifier.bind(this))
     this.registerPrefix(TokenType.INT, this.parseIntegerLiteral.bind(this))
+    this.registerPrefix(TokenType.BANG, this.parsePrefixExpression.bind(this))
+    this.registerPrefix(TokenType.MINUS, this.parsePrefixExpression.bind(this))
     this.registerPrefix(TokenType.TRUE, this.parseBoolean.bind(this))
     this.registerPrefix(TokenType.FALSE, this.parseBoolean.bind(this))
     this.registerPrefix(TokenType.INT, this.parseIntegerLiteral.bind(this))
@@ -222,5 +225,15 @@ export class Parser {
       leftExpression = infix(leftExpression)
     }
     return leftExpression
+  }
+
+  private parsePrefixExpression(): Expression {
+    const expression = new PrefixExpression(
+      this.currentToken,
+      this.currentToken.literal
+    )
+    this.nextToken()
+    expression.right = this.parseExpression(Precedence.PREFIX)
+    return expression
   }
 }

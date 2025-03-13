@@ -3,8 +3,11 @@ import { Lexer } from '../src/lexer'
 import { Parser } from '../src/parser'
 import { LetStatement, Program } from '../src/ast'
 import type {
+  BooleanLiteral,
   ExpressionStatement,
   Identifier,
+  IntegerLiteral,
+  PrefixExpression,
   ReturnStatement,
   Statement,
 } from '../src/ast'
@@ -192,6 +195,33 @@ return foobar;`
       })
     })
   })
+  describe('PrefixExpression', () => {
+    const testCases = [
+      { input: '!5;', operator: '!', value: 5 },
+      { input: '-15;', operator: '-', value: 15 },
+      { input: '!foobar', operator: '!', value: 'foobar' },
+      { input: '-foobar', operator: '-', value: 'foobar' },
+      { input: '!true;', operator: '!', value: true },
+      { input: '!false;', operator: '!', value: false },
+    ]
+    testCases.forEach((testCase) => {
+      it(`should parse "${testCase.input}" correctly`, () => {
+        const lexer = new Lexer(testCase.input)
+        const parser = new Parser(lexer)
+        const program: Program | null = parser.parseProgram()
+        checkParseErrors(parser)
+
+        expect(program).not.toBeNull()
+        expect(program!.statements.length).toBe(1)
+
+        const statement = program!.statements[0] as any
+        const expression = statement.expression as PrefixExpression
+
+        expect(expression.operator).toBe(testCase.operator)
+        testLiteralExpression(expression.right, testCase.value)
+      })
+    })
+  })
 })
 
 export function testLetStatement(statement: Statement, name: string): boolean {
@@ -224,4 +254,36 @@ export function testLetStatement(statement: Statement, name: string): boolean {
   }
 
   return true
+}
+
+function testLiteralExpression(expression: any, expected: any) {
+  switch (typeof expected) {
+    case 'number':
+      testIntegerLiteral(expression, expected)
+      break
+    case 'string':
+      testIdentifier(expression, expected)
+      break
+    case 'boolean':
+      testBooleanLiteral(expression, expected)
+      break
+    default:
+      throw new Error(`Type of exp not handled. got=${typeof expression}`)
+  }
+}
+
+function testIntegerLiteral(expression: any, expected: any) {
+  const integerLiteral = expression as IntegerLiteral
+  expect(integerLiteral.value).toBe(expected)
+  expect(integerLiteral.tokenLiteral()).toBe(expected.toString())
+}
+function testIdentifier(expression: any, expected: any) {
+  const identifier = expression as Identifier
+  expect(identifier.value).toBe(expected)
+  expect(identifier.tokenLiteral()).toBe(expected)
+}
+function testBooleanLiteral(expression: any, expected: any) {
+  const booleanLiteral = expression as BooleanLiteral
+  expect(booleanLiteral.value).toBe(expected)
+  expect(booleanLiteral.tokenLiteral()).toBe(expected.toString())
 }
