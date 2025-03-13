@@ -10,6 +10,7 @@ import type {
   PrefixExpression,
   ReturnStatement,
   Statement,
+  InfixExpression,
 } from '../src/ast'
 import { TokenType } from 'src/token'
 
@@ -222,6 +223,106 @@ return foobar;`
       })
     })
   })
+  describe('InfixExpression', () => {
+    const testCases = [
+      { input: '5 + 5;', leftValue: 5, operator: '+', rightValue: 5 },
+      { input: '5 - 5;', leftValue: 5, operator: '-', rightValue: 5 },
+      { input: '5 * 5;', leftValue: 5, operator: '*', rightValue: 5 },
+      { input: '5 / 5;', leftValue: 5, operator: '/', rightValue: 5 },
+      { input: '5 < 5;', leftValue: 5, operator: '<', rightValue: 5 },
+      { input: '5 > 5;', leftValue: 5, operator: '>', rightValue: 5 },
+      { input: '5 == 5;', leftValue: 5, operator: '==', rightValue: 5 },
+      { input: '5 != 5;', leftValue: 5, operator: '!=', rightValue: 5 },
+      {
+        input: 'foobar + barfoo;',
+        leftValue: 'foobar',
+        operator: '+',
+        rightValue: 'barfoo',
+      },
+      {
+        input: 'foobar - barfoo;',
+        leftValue: 'foobar',
+        operator: '-',
+        rightValue: 'barfoo',
+      },
+      {
+        input: 'foobar * barfoo;',
+        leftValue: 'foobar',
+        operator: '*',
+        rightValue: 'barfoo',
+      },
+      {
+        input: 'foobar / barfoo;',
+        leftValue: 'foobar',
+        operator: '/',
+        rightValue: 'barfoo',
+      },
+      {
+        input: 'foobar > barfoo;',
+        leftValue: 'foobar',
+        operator: '>',
+        rightValue: 'barfoo',
+      },
+      {
+        input: 'foobar < barfoo;',
+        leftValue: 'foobar',
+        operator: '<',
+        rightValue: 'barfoo',
+      },
+      {
+        input: 'foobar == barfoo;',
+        leftValue: 'foobar',
+        operator: '==',
+        rightValue: 'barfoo',
+      },
+      {
+        input: 'foobar != barfoo;',
+        leftValue: 'foobar',
+        operator: '!=',
+        rightValue: 'barfoo',
+      },
+      {
+        input: 'true == true',
+        leftValue: true,
+        operator: '==',
+        rightValue: true,
+      },
+      {
+        input: 'true != false',
+        leftValue: true,
+        operator: '!=',
+        rightValue: false,
+      },
+      {
+        input: 'false == false',
+        leftValue: false,
+        operator: '==',
+        rightValue: false,
+      },
+    ]
+    testCases.forEach((testCase) => {
+      it(`should parse "${testCase.input}" correctly`, () => {
+        const lexer = new Lexer(testCase.input)
+        const parser = new Parser(lexer)
+        const program: Program | null = parser.parseProgram()
+        checkParseErrors(parser)
+
+        expect(program).not.toBeNull()
+        expect(program!.statements.length).toBe(1)
+
+        const statement = program!.statements[0] as any
+        const expression = statement.expression as InfixExpression
+
+        expect(expression.operator).toBe(testCase.operator)
+        testInfixExpression(
+          expression,
+          testCase.leftValue,
+          testCase.operator,
+          testCase.rightValue
+        )
+      })
+    })
+  })
 })
 
 export function testLetStatement(statement: Statement, name: string): boolean {
@@ -270,6 +371,17 @@ function testLiteralExpression(expression: any, expected: any) {
     default:
       throw new Error(`Type of exp not handled. got=${typeof expression}`)
   }
+}
+
+function testInfixExpression(
+  expression: InfixExpression,
+  leftExpected: any,
+  operator: any,
+  rightExpected: any
+) {
+  expect(expression.operator).toBe(operator)
+  testLiteralExpression(expression.left, leftExpected)
+  testLiteralExpression(expression.right, rightExpected)
 }
 
 function testIntegerLiteral(expression: any, expected: any) {

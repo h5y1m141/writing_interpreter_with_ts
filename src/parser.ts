@@ -10,9 +10,9 @@ import {
   ExpressionStatement,
   type Statement,
   PrefixExpression,
+  InfixExpression,
 } from './ast'
 import type { Expression } from './ast'
-import type { E } from 'vitest/dist/chunks/environment.d8YfPkTm.js'
 
 export enum Precedence {
   LOWEST = 0,
@@ -66,12 +66,27 @@ export class Parser {
     this.registerPrefix(TokenType.TRUE, this.parseBoolean.bind(this))
     this.registerPrefix(TokenType.FALSE, this.parseBoolean.bind(this))
     this.registerPrefix(TokenType.INT, this.parseIntegerLiteral.bind(this))
+
+    this.registerInfix(TokenType.PLUS, this.parseInfixExpression.bind(this))
+    this.registerInfix(TokenType.MINUS, this.parseInfixExpression.bind(this))
+    this.registerInfix(TokenType.SLASH, this.parseInfixExpression.bind(this))
+    this.registerInfix(TokenType.ASTERISK, this.parseInfixExpression.bind(this))
+    this.registerInfix(TokenType.EQ, this.parseInfixExpression.bind(this))
+    this.registerInfix(TokenType.NOT_EQ, this.parseInfixExpression.bind(this))
+    this.registerInfix(TokenType.LT, this.parseInfixExpression.bind(this))
+    this.registerInfix(TokenType.GT, this.parseInfixExpression.bind(this))
   }
 
   private registerPrefix(tokenType: TokenType, fn: () => Expression) {
     this.prefixParseFunctions.set(tokenType, fn)
   }
 
+  // private registerInfix(
+  //   tokenType: TokenType,
+  //   fn: (left: Expression) => Expression
+  // ) {
+  //   this.infixParseFunctions.set(tokenType, fn)
+  // }
   private registerInfix(
     tokenType: TokenType,
     fn: (left: Expression) => Expression
@@ -235,5 +250,19 @@ export class Parser {
     this.nextToken()
     expression.right = this.parseExpression(Precedence.PREFIX)
     return expression
+  }
+  private parseInfixExpression(left: Expression): Expression {
+    const expression = new InfixExpression(
+      this.currentToken,
+      left,
+      this.currentToken.literal
+    )
+    const precedence = this.currentPrecedence()
+    this.nextToken()
+    expression.right = this.parseExpression(precedence)
+    return expression
+  }
+  private currentPrecedence() {
+    return precedences[this.currentToken.type] ?? Precedence.LOWEST
   }
 }
