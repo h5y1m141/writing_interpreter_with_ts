@@ -176,3 +176,31 @@ export class PrefixExpression implements Statement {
     console.log('statementNode')
   }
 }
+
+export class InfixExpression implements Statement {
+  public token: Token
+  public left: Expression | null
+  public operator: string
+  public right: Expression | null
+
+  constructor(
+    token: Token,
+    left: Expression | null,
+    operator: string,
+    right: Expression | null = null
+  ) {
+    this.token = token
+    this.left = left
+    this.operator = operator
+    this.right = right
+  }
+  tokenLiteral(): string {
+    return this.token.literal
+  }
+  expressionNode() {
+    console.log('expressionNode')
+  }
+  statementNode() {
+    console.log('statementNode')
+  }
+}
