@@ -1,4 +1,4 @@
-import { Token } from './token'
+import { Token, TokenType } from './token'
 import { Lexer } from './lexer'
 export class Repl {
   private static readonly PROMPT = '>> '
@@ -32,7 +32,7 @@ export class Repl {
       const lexer = new Lexer(input)
       let token
 
-      while ((token = lexer.nextToken()).type !== Token.EOF) {
+      while ((token = lexer.nextToken()).type !== TokenType.EOF) {
         // Lexer の処理ではトークンの情報を1行ずつ表示したいため、console.log() を利用
         // こうすることで自動で改行されて見やすくなる。
         // ※ process.stdout.writeだとプロンプトとトークンがつながってしまい視認性悪い
