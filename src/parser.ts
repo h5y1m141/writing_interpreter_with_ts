@@ -11,17 +11,21 @@ import {
   type Statement,
   PrefixExpression,
   InfixExpression,
+  CallExpression,
 } from './ast'
 import type { Expression } from './ast'
 
+// 書籍ではLOWESTのみ明示的に値を設定していたが後述する
+// precedence < this.peekPrecedence()
+// の比較処理でここの値を参照する構造のため明示的に全ての値を設定しています
 export enum Precedence {
   LOWEST = 0,
-  EQUALS, // ==, !=
-  LESSGREATER, // >, <
-  SUM, // +, -
-  PRODUCT, // *, /
-  PREFIX, // -X, !X
-  CALL, // 関数呼び出し
+  EQUALS = 1, // ==, !=
+  LESSGREATER = 2, // >, <
+  SUM = 3, // +, -
+  PRODUCT = 4, // *, /
+  PREFIX = 5, // -X, !X
+  CALL = 6, // 関数呼び出し
 }
 
 export const precedences: Partial<Record<TokenType, Precedence>> = {
@@ -65,7 +69,10 @@ export class Parser {
     this.registerPrefix(TokenType.MINUS, this.parsePrefixExpression.bind(this))
     this.registerPrefix(TokenType.TRUE, this.parseBoolean.bind(this))
     this.registerPrefix(TokenType.FALSE, this.parseBoolean.bind(this))
-    this.registerPrefix(TokenType.INT, this.parseIntegerLiteral.bind(this))
+    this.registerPrefix(
+      TokenType.LPAREN,
+      this.parseGroupedExpression.bind(this)
+    )
 
     this.registerInfix(TokenType.PLUS, this.parseInfixExpression.bind(this))
     this.registerInfix(TokenType.MINUS, this.parseInfixExpression.bind(this))
@@ -75,18 +82,14 @@ export class Parser {
     this.registerInfix(TokenType.NOT_EQ, this.parseInfixExpression.bind(this))
     this.registerInfix(TokenType.LT, this.parseInfixExpression.bind(this))
     this.registerInfix(TokenType.GT, this.parseInfixExpression.bind(this))
+
+    this.registerInfix(TokenType.LPAREN, this.parseCallExpression.bind(this))
   }
 
   private registerPrefix(tokenType: TokenType, fn: () => Expression) {
     this.prefixParseFunctions.set(tokenType, fn)
   }
 
-  // private registerInfix(
-  //   tokenType: TokenType,
-  //   fn: (left: Expression) => Expression
-  // ) {
-  //   this.infixParseFunctions.set(tokenType, fn)
-  // }
   private registerInfix(
     tokenType: TokenType,
     fn: (left: Expression) => Expression
@@ -264,5 +267,38 @@ export class Parser {
   }
   private currentPrecedence() {
     return precedences[this.currentToken.type] ?? Precedence.LOWEST
+  }
+  private parseGroupedExpression(): Expression {
+    this.nextToken()
+    const expression = this.parseExpression(Precedence.LOWEST)
+
+    if (!this.expectPeek(TokenType.RPAREN)) {
+      return new Identifier(this.currentToken, '') // 仮のダミー
+    }
+    return expression
+  }
+  private parseCallExpression(func: Expression): Expression {
+    const args = this.parseCallArguments()
+    return new CallExpression(this.currentToken, func, args)
+  }
+  private parseCallArguments(): Expression[] {
+    const args: Expression[] = []
+
+    if (this.peekTokenIs(TokenType.RPAREN)) {
+      this.nextToken()
+      return args
+    }
+    this.nextToken()
+    args.push(this.parseExpression(Precedence.LOWEST))
+    while (this.peekTokenIs(TokenType.COMMA)) {
+      this.nextToken()
+      this.nextToken()
+      args.push(this.parseExpression(Precedence.LOWEST))
+    }
+
+    if (!this.expectPeek(TokenType.RPAREN)) {
+      return [] // 仮のダミー
+    }
+    return args
   }
 }

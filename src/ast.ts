@@ -204,3 +204,25 @@ export class InfixExpression implements Statement {
     console.log('statementNode')
   }
 }
+
+export class CallExpression implements Expression {
+  public token: Token
+  public func: Expression
+  public arguments: Expression[]
+
+  constructor(token: Token, func: Expression, args: Expression[]) {
+    this.token = token
+    this.func = func
+    this.arguments = args
+  }
+
+  expressionNode() {
+    console.log('expressionNode')
+  }
+  statementNode() {
+    console.log('statementNode')
+  }
+  tokenLiteral(): string {
+    return this.token.literal
+  }
+}
