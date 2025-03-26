@@ -6,11 +6,13 @@ export type Node = {
 
 export type Statement = Node & {
   statementNode: () => void
+  toString(): string
 }
 
 export interface Expression extends Node {
   expressionNode: () => void
   token: Token
+  toString(): string
 }
 
 export class Program {
@@ -22,6 +24,9 @@ export class Program {
 
   tokenLiteral(): string {
     return this.statements.length > 0 ? this.statements[0].tokenLiteral() : ''
+  }
+  toString(): string {
+    return this.statements.map((s) => s.toString()).join('')
   }
 }
 
@@ -154,6 +159,9 @@ export class ExpressionStatement implements Statement {
   statementNode() {
     console.log('statementNode')
   }
+  toString(): string {
+    return this.expression ? this.expression.toString() : ''
+  }
 }
 
 export class PrefixExpression implements Statement {
@@ -174,6 +182,9 @@ export class PrefixExpression implements Statement {
   }
   statementNode() {
     console.log('statementNode')
+  }
+  toString(): string {
+    return `(${this.operator}${this.right!.toString()})`
   }
 }
 
@@ -203,6 +214,9 @@ export class InfixExpression implements Statement {
   statementNode() {
     console.log('statementNode')
   }
+  toString(): string {
+    return `(${this.left!.toString()} ${this.operator} ${this.right!.toString()})`
+  }
 }
 
 export class CallExpression implements Expression {
@@ -224,5 +238,9 @@ export class CallExpression implements Expression {
   }
   tokenLiteral(): string {
     return this.token.literal
+  }
+  toString(): string {
+    const args = this.arguments.map((arg) => arg.toString()).join(', ')
+    return `${this.func.toString()}(${args})`
   }
 }
