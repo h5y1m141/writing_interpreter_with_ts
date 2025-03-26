@@ -433,6 +433,8 @@ return foobar;`
         const program: Program | null = parser.parseProgram()
         checkParseErrors(parser)
         expect(program).not.toBeNull()
+        const actual = program!.toString()
+        expect(actual).toBe(testCase.expected)
       })
     })
   })
