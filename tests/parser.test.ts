@@ -438,6 +438,30 @@ return foobar;`
       })
     })
   })
+  describe('IFExpression', () => {
+    it('should parse basic if expression', () => {
+      const input = 'if (x < y) { x }'
+      const lexer = new Lexer(input)
+      const parser = new Parser(lexer)
+      const program: Program | null = parser.parseProgram()
+      checkParseErrors(parser)
+      expect(program).not.toBeNull()
+      expect(program!.statements.length).toBe(1)
+
+      const statement = program!.statements[0] as ExpressionStatement
+      const expression = statement.expression as any
+      // 条件部分のテスト
+      testInfixExpression(expression.condition, 'x', '<', 'y')
+      // 結果ブロックのテスト
+      expect(expression.consequence.statements.length).toBe(1)
+
+      const consequence = expression.consequence
+        .statements[0] as ExpressionStatement
+      testIdentifier(consequence.expression, 'x')
+      // else部分がないことを確認
+      expect(expression.alternative).toBeNull()
+    })
+  })
 })
 
 export function testLetStatement(statement: Statement, name: string): boolean {

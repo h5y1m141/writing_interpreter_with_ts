@@ -244,3 +244,57 @@ export class CallExpression implements Expression {
     return `${this.func.toString()}(${args})`
   }
 }
+
+export class IfExpression implements Expression {
+  public token: Token
+  public condition: Expression | null
+  public consequence: BlockStatement | null
+  public alternative: BlockStatement | null
+
+  constructor(token: Token) {
+    this.token = token
+    this.condition = null
+    this.consequence = null
+    this.alternative = null
+  }
+
+  expressionNode() {
+    console.log('expressionNode')
+  }
+  tokenLiteral(): string {
+    return this.token.literal
+  }
+  toString(): string {
+    let str = 'if'
+    str += this.condition ? `(${this.condition.toString()})` : '() '
+    str += this.consequence ? this.consequence.toString() : '{}'
+
+    if (this.alternative) {
+      str += ' else '
+      str += this.alternative.toString()
+    }
+    return str
+  }
+}
+
+export class BlockStatement implements Statement {
+  public token: Token
+  public statements: Statement[]
+
+  constructor(token: Token) {
+    this.token = token
+    this.statements = []
+  }
+  expressionNode() {
+    console.log('expressionNode')
+  }
+  statementNode() {
+    console.log('statementNode')
+  }
+  tokenLiteral(): string {
+    return this.token.literal
+  }
+  toString(): string {
+    return `{ ${this.statements.map((s) => s.toString()).join(' ')} }`
+  }
+}

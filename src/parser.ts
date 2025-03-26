@@ -12,8 +12,9 @@ import {
   PrefixExpression,
   InfixExpression,
   CallExpression,
+  IfExpression,
 } from './ast'
-import type { Expression } from './ast'
+import { BlockStatement, type Expression } from './ast'
 
 // 書籍ではLOWESTのみ明示的に値を設定していたが後述する
 // precedence < this.peekPrecedence()
@@ -73,6 +74,7 @@ export class Parser {
       TokenType.LPAREN,
       this.parseGroupedExpression.bind(this)
     )
+    this.registerPrefix(TokenType.IF, this.parseIfExpression.bind(this))
 
     this.registerInfix(TokenType.PLUS, this.parseInfixExpression.bind(this))
     this.registerInfix(TokenType.MINUS, this.parseInfixExpression.bind(this))
@@ -300,5 +302,55 @@ export class Parser {
       return [] // 仮のダミー
     }
     return args
+  }
+  private parseIfExpression(): Expression {
+    const expression = new IfExpression(this.currentToken)
+
+    // '(' が次に来ることを期待
+    if (!this.expectPeek(TokenType.LPAREN)) {
+      return new Identifier(this.currentToken, '') // 仮のダミー
+    }
+    this.nextToken() // '('をスキップして次のトークンへ
+    expression.condition = this.parseExpression(Precedence.LOWEST)
+
+    // ')' が次に来ることを期待
+    if (!this.expectPeek(TokenType.RPAREN)) {
+      return new Identifier(this.currentToken, '') // 仮のダミー
+    }
+
+    // '{' が次に来ることを期待
+    if (!this.expectPeek(TokenType.LBRACE)) {
+      return new Identifier(this.currentToken, '') // 仮のダミー
+    }
+    expression.consequence = this.parseBlockStatement()
+
+    // else部分が存在するかチェック
+    if (this.peekTokenIs(TokenType.ELSE)) {
+      this.nextToken()
+      if (!this.expectPeek(TokenType.LBRACE)) {
+        return new Identifier(this.currentToken, '') // 仮のダミー
+      }
+      expression.alternative = this.parseBlockStatement()
+    }
+    return expression
+  }
+  private parseBlockStatement(): BlockStatement {
+    const block = new BlockStatement(this.currentToken)
+    block.statements = []
+
+    this.nextToken()
+
+    // '}'が来るまでステートメントを解析し続ける
+    while (
+      !this.curTokenIs(TokenType.RBRACE) &&
+      !this.curTokenIs(TokenType.EOF)
+    ) {
+      const statement = this.parseStatement()
+      if (statement !== null) {
+        block.statements.push(statement)
+      }
+      this.nextToken()
+    }
+    return block
   }
 }
